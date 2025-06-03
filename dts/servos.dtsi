@@ -1,0 +1,19 @@
+// / {
+//     servos {
+//         compatible = "my-servos"; /* optional, custom node */
+        
+//         vertical_servo: vertical-servo {
+//             compatible = "pwm-servo";
+//             pwms = <&dummy_pwm 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>; /* will be overridden */
+//             min-pulse = <PWM_USEC(1000)>; /* 1ms */
+//             max-pulse = <PWM_USEC(2000)>; /* 2ms */
+//         };
+
+//         horizontal_servo: horizontal-servo {
+//             compatible = "pwm-servo";
+//             pwms = <&dummy_pwm 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>; /* will be overridden */
+//             min-pulse = <PWM_USEC(1000)>; /* 1ms */
+//             max-pulse = <PWM_USEC(2000)>; /* 2ms */
+//         };
+//     };
+// };
