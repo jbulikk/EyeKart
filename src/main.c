@@ -12,36 +12,181 @@
  #include <zephyr/sys/printk.h>
  #include <zephyr/device.h>
  #include <zephyr/drivers/pwm.h>
+ #include <zephyr/drivers/i2c.h>
+#include "ICM_20948_C.h"
 
- #define SERVO_YAW_NODE DT_ALIAS(servo_yaw)
- #define SERVO_PITCH_NODE DT_ALIAS(servo_pitch)
+
+
+#define I2C_DEV_LABEL "I2C_0"
+#define REG_BANK_SEL  0x7F
+#define BANK_0        0x00
+#define WHO_AM_I_REG  0x00
+#define ICM20948_ADDR 0x69
+
+void i2c_scanner(void);
+void read_icm_whoami(void);
+
+int main(void)
+{
+	printk("Start of main\n");
+
+	const struct device *i2c_dev = device_get_binding(I2C_DEV_LABEL); // nazwa zależy od platformy
+	if (!i2c_dev) {
+ 		printk("Nie można znaleźć\n");
+        printk(I2C_DEV_LABEL);
+    	return;
+	}
+
+    k_sleep(K_SECONDS(10));
+	while(1){
+        read_icm_whoami();
+        k_sleep(K_SECONDS(2));
+	}
+    // icm_init(i2c_dev, ICM20948_ADDR);
+
+    // while (1) {
+    //     icm_read_accel_gyro(i2c_dev, ICM20948_ADDR);
+    //     k_sleep(K_MSEC(500));
+    // }
+}
+
+void icm_set_bank(const struct device *i2c_dev, uint8_t addr, uint8_t bank) {
+    uint8_t reg[2] = { 0x7F, bank << 4 }; // rejestr 0x7F, wartość BANK << 4
+    i2c_write(i2c_dev, reg, 2, addr);
+}
+
+void icm_init(const struct device *i2c_dev, uint8_t addr) {
+    // Przełącz na BANK 0
+    icm_set_bank(i2c_dev, addr, 0);
+    k_sleep(K_MSEC(100));
+
+    // Wyłącz tryb sleep
+    uint8_t pwr_mgmt_1[2] = { 0x10, 0x01 }; // Reset device
+    i2c_write(i2c_dev, pwr_mgmt_1, 2, addr);
+    k_sleep(K_MSEC(100));
+
+    pwr_mgmt_1[1] = 0x01; // Clock source = auto
+    i2c_write(i2c_dev, pwr_mgmt_1, 2, addr);
+    k_sleep(K_MSEC(100));
+
+    // Włącz akcelerometr i żyroskop
+    uint8_t pwr_mgmt_2[2] = { 0x11, 0x00 }; // Włącz wszystko
+    i2c_write(i2c_dev, pwr_mgmt_2, 2, addr);
+}
+
+void icm_read_accel_gyro(const struct device *i2c_dev, uint8_t addr) {
+    // BANK 2 dla danych
+    icm_set_bank(i2c_dev, addr, 2);
+
+    uint8_t reg = 0x2D; // ACCEL_XOUT_H
+    uint8_t data[12] = {0};
+
+    // Odczytaj 12 bajtów: 6 dla akcelerometru, 6 dla żyroskopu
+    i2c_write_read(i2c_dev, addr, &reg, 1, data, 12);
+
+    int16_t ax = (data[0] << 8) | data[1];
+    int16_t ay = (data[2] << 8) | data[3];
+    int16_t az = (data[4] << 8) | data[5];
+
+    int16_t gx = (data[6] << 8) | data[7];
+    int16_t gy = (data[8] << 8) | data[9];
+    int16_t gz = (data[10] << 8) | data[11];
+
+    printk("Accel: X=%d Y=%d Z=%d\n", ax, ay, az);
+    printk("Gyro:  X=%d Y=%d Z=%d\n", gx, gy, gz);
+}
+
+
+void read_icm_whoami(void) {
+    const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c0));
+
+    if (!device_is_ready(i2c_dev)) {
+        printk("I2C device not ready\n");
+        return;
+    }
+
+    uint8_t reg_addr = WHO_AM_I_REG;
+    uint8_t who_am_i = 0;
+
+    int ret = i2c_write_read(i2c_dev, ICM20948_ADDR, &reg_addr, 1, &who_am_i, 1);
+    if (ret != 0) {
+        printk("Błąd odczytu WHO_AM_I: %d\n", ret);
+    } else {
+        printk("WHO_AM_I: 0x%02X\n", who_am_i);
+    }
+}
+
+void i2c_scanner(void) {
+    const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c0));
+
+    if (!device_is_ready(i2c_dev)) {
+        printk("I2C device not ready\n");
+        return;
+    }
+
+    printk("Skanowanie I2C...\n");
+
+    while(true)
+    {
+        for (uint8_t addr = 0x03; addr <= 0x77; addr++) {
+            uint8_t dummy = 0;
+            int ret = i2c_write(i2c_dev, &dummy, 1, addr);
+            if (ret == 0) {
+                printk("Znaleziono urządzenie na adresie 0x%02X\n", addr);
+            }
+        }
+        printk("koniec skanu\n");
+        k_sleep(K_SECONDS(3));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// int main(void)
+// {
+// 	printk("Start of main\n");
+
+// 	const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c0));
+//     if (!device_is_ready(i2c_dev)) {
+//         printk("I2C device not ready!\n");
+//         return 0;
+//     }
+
+//     // Ustawienie banku 0 (opcjonalnie, zależnie od stanu początkowego)
+//     uint8_t set_bank_cmd[2] = { REG_BANK_SEL, BANK_0 };
+//     if (i2c_write(i2c_dev, set_bank_cmd, sizeof(set_bank_cmd), ICM20948_ADDR) != 0) {
+//         printk("Failed to select bank 0!\n");
+//         return 0;
+//     }
+
+//     // Odczyt WHO_AM_I
+//     uint8_t reg = REG_WHO_AM_I;
+//     uint8_t who_am_i = 0;
+
+//     if (i2c_write_read(i2c_dev, ICM20948_ADDR, &reg, 1, &who_am_i, 1) != 0) {
+//         printk("Failed to read WHO_AM_I!\n");
+//         return 0;
+//     }
+
+//     printk("WHO_AM_I: 0x%02X\n", who_am_i);
+
+// }
+
  
- #define STEP PWM_USEC(10)
- 
- typedef struct servo_t
- {
-	 struct pwm_dt_spec pwm;
-	 uint32_t min_pulse;
-	 uint32_t max_pulse;
- } servo_t;
- 
- static const servo_t servo_yaw = {
-		 .pwm = PWM_DT_SPEC_GET(SERVO_YAW_NODE),
-		 .min_pulse = DT_PROP(SERVO_YAW_NODE, min_pulse),
-		 .max_pulse = DT_PROP(SERVO_YAW_NODE, max_pulse),
- };
- 
- static const servo_t servo_pitch =
-	 {
-		 .pwm = PWM_DT_SPEC_GET(SERVO_PITCH_NODE),
-		 .min_pulse = DT_PROP(SERVO_PITCH_NODE, min_pulse),
-		 .max_pulse = DT_PROP(SERVO_PITCH_NODE, max_pulse),
- };
- 
- enum direction {
-	 DOWN,
-	 UP,
- };
+
 
 // Timer example
 static void led_timer_callback(struct k_timer *timer_id)
@@ -65,74 +210,3 @@ static void on_connected(void) {
     // bt_central_send("DZIALA");
 	// printk("Data 2 sent\n");
 }
-
-int main(void)
-{
-	printk("Start of main\n");
-    led_init();
-	// bt_peripheral_init(on_receive);
-	bt_central_init(on_connected);
-
-
-	// Start the LED toggle timer to fire every 1 second
-	k_timer_start(&led_timer, K_SECONDS(1), K_SECONDS(1));
-
-	 uint32_t pulse_width = servo_yaw.min_pulse;
-	 enum direction dir = UP;
-	 int ret;
- 
-	 printk("Servomotor control\n");
- 
-	 if (!pwm_is_ready_dt(&servo_yaw.pwm))
-	 {
-		 printk("Error: PWM device %s is not ready\n", servo_yaw.pwm.dev->name);
-		 return 0;
-	 };
-
-	int i = 0;
-	char buf[32];
-	while (1) {
-		snprintf(buf, sizeof(buf), "ABC %d", i);
-		printk("Sending: %s\n", buf);
-		bt_central_send(buf);
-		i++;
-		k_sleep(K_MSEC(5000));
-	}
-
-	//  while (1)
-	//  {
-	// 	 ret = pwm_set_pulse_dt(&servo_yaw.pwm, pulse_width);
-	// 	 if (ret < 0)
-	// 	 {
-	// 		 printk("Error %d: failed to set pulse width\n", ret);
-	// 		 return 0;
-	// 	 }
- 
-	// 	 if (dir == DOWN)
-	// 	 {
-	// 		 if (pulse_width <= servo_yaw.min_pulse)
-	// 		 {
-	// 			 dir = UP;
-	// 			 pulse_width = servo_yaw.min_pulse;
-	// 		 }
-	// 		 else
-	// 		 {
-	// 			 pulse_width -= STEP;
-	// 		 }
-	// 	 }
-	// 	 else
-	// 	 {
-	// 		 pulse_width += STEP;
- 
-	// 		 if (pulse_width >= servo_yaw.max_pulse)
-	// 		 {
-	// 			 dir = DOWN;
-	// 			 pulse_width = servo_yaw.max_pulse;
-	// 		 }
-	// 	 }
-	// 	 printf("PWM pulse width [us]: %d\n", pulse_width);
-	// 	 k_sleep(K_MSEC(10));
-	//  }
-	 return 0;
- }
- 
