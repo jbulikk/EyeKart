@@ -42,6 +42,7 @@ int main(void)
         i2c_scanner();
         k_sleep(K_SECONDS(2));
 	}
+    //test
 }
 
 void icm_set_bank(const struct device *i2c_dev, uint8_t addr, uint8_t bank) {
