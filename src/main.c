@@ -39,15 +39,9 @@ int main(void)
 
     k_sleep(K_SECONDS(10));
 	while(1){
-        read_icm_whoami();
+        i2c_scanner();
         k_sleep(K_SECONDS(2));
 	}
-    // icm_init(i2c_dev, ICM20948_ADDR);
-
-    // while (1) {
-    //     icm_read_accel_gyro(i2c_dev, ICM20948_ADDR);
-    //     k_sleep(K_MSEC(500));
-    // }
 }
 
 void icm_set_bank(const struct device *i2c_dev, uint8_t addr, uint8_t bank) {
