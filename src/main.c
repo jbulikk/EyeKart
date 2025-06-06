@@ -96,7 +96,6 @@ void icm_read_accel_gyro(const struct device *i2c_dev, uint8_t addr) {
     printk("Gyro:  X=%d Y=%d Z=%d\n", gx, gy, gz);
 }
 
-
 void read_icm_whoami(void) {
     const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(i2c0));
 
