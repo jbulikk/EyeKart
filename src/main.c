@@ -15,18 +15,24 @@ int main(void) {
     }
 
     icm_read_whoami(i2c_dev);
+    ImuData imu = {0};
 
     printk("Initializing ICM-20948...\n");
     icm_init(i2c_dev);
 
+    printf("Start loop...\n");
+
     while (1) {
-        int16_t ax, ay, az, gx, gy, gz, temp;
-        if (icm_read_all_data(i2c_dev, &ax, &ay, &az, &gx, &gy, &gz, &temp) == 0) {
-            printk("ACC [mg]: X=%d Y=%d Z=%d | ", ax, ay, az);
-            printk("GYRO [mdps]: X=%d Y=%d Z=%d | TEMP [raw]=%d\n", gx, gy, gz, temp);
-        } else {
-            printk("Failed to read sensor data\n");
-        }
-        k_msleep(500);
+        // if (icm_read_data_and_calculate_angle(i2c_dev, &imu) == 0) {
+        //     // printk("Pitch: acc=%d°, gyro=%d°, comp=%d° | Roll: acc=%d°, gyro=%d°, comp=%d°\n",
+        //     //        imu.pitch_acc, imu.pitch_gyro, imu.pitch_complementary,
+        //     //        imu.roll_acc, imu.roll_gyro, imu.roll_complementary);
+        // } else {
+        //     printk("Read error!\n");
+        // }
+
+        icm_read_acc_mag_temp(i2c_dev, &imu);
+
+        k_sleep(K_SECONDS(0.01));
     }
 }
