@@ -55,6 +55,12 @@ BT_GATT_SERVICE_DEFINE(my_service,
 int bt_peripheral_init(bt_peripheral_recv_cb_t cb)
 {
     int err;
+    struct bt_le_adv_param adv_params = {
+        .options = BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_USE_NAME | BT_LE_ADV_OPT_CODED,
+        .interval_min = BT_GAP_ADV_FAST_INT_MIN_2,  // 11.25 ms * 2 = 22.5 ms
+        .interval_max = BT_GAP_ADV_FAST_INT_MAX_2,  // 11.25 ms * 4 = 45 ms
+        .id = BT_ID_DEFAULT,
+    };
 
     recv_cb = cb;
 
@@ -64,12 +70,12 @@ int bt_peripheral_init(bt_peripheral_recv_cb_t cb)
         return err;
     }
 
-    err = bt_le_adv_start(BT_LE_ADV_CONN_NAME, NULL, 0, NULL, 0);
+    err = bt_le_adv_start(&adv_params, NULL, 0, NULL, 0);
     if (err) {
         printk("Advertising failed to start (err %d)\n", err);
         return err;
     }
 
-    printk("Peripheral advertising started\n");
+    printk("Peripheral advertising started with Coded PHY\n");
     return 0;
 }

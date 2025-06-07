@@ -5,7 +5,7 @@
 #include <zephyr/sys/printk.h>
 #include <string.h>
 
-#define TARGET_NAME "Pixel 8 Pro"
+#define TARGET_NAME "ZephyrServo"
 
 static struct bt_conn *default_conn;
 static struct bt_gatt_discover_params discover_params;
@@ -151,6 +151,12 @@ int bt_central_init(bt_central_connected_cb_t cb)
         return err;
     }
 
+    // Set TX power to +8 dBm (maximum)
+    // err = bt_set_tx_power(BT_TX_POWER_LEVEL_DEFAULT, 8);
+    // if (err) {
+    // printk("Failed to set TX power (err %d)\n", err);
+    // }
+    
     bt_conn_cb_register(&conn_callbacks);
 
     err = bt_le_scan_start(BT_LE_SCAN_ACTIVE, scan_cb);

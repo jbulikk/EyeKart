@@ -140,7 +140,7 @@ int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu) {
     //     imu->accelerometer_scaled.x, imu->accelerometer_scaled.y, imu->accelerometer_scaled.z,
     //     imu->gyroscope_scaled.x, imu->gyroscope_scaled.y, imu->gyroscope_scaled.z);
 
-    printf("pitch=%f, roll=%f\n", imu->pitch_complementary, imu->roll_complementary);
+    // printf("pitch=%f, roll=%f\n", imu->pitch_complementary, imu->roll_complementary);
 
     imu->temp = raw_temp;
     return 0;
