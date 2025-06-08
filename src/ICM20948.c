@@ -18,7 +18,7 @@ const static float gyro_sensitivity = 16.4;
 float sampling_time_sec;
 float measurement_time;
 float last_measurement_time = 0.0f;
-float alpha = 0.99f;
+float alpha = 0.95f;
 
 double get_time_seconds() {
     // printk("%f", (k_uptime_get() / 1000.0f));

@@ -52,7 +52,7 @@ int main(void) {
 
     printk("Start of main\n");
     bt_central_init(on_connected);
-    k_timer_start(&send_angle_timer, K_MSEC(300), K_MSEC(300));
+    k_timer_start(&send_angle_timer, K_MSEC(50), K_MSEC(50));
 
     const struct device *i2c_dev = device_get_binding(I2C_DEV_LABEL);
     if (!i2c_dev) {
@@ -68,13 +68,6 @@ int main(void) {
     printk("Start loop...\n");
 
     while (1) {
-        // if (icm_read_data_and_calculate_angle(i2c_dev, &imu) == 0) {
-        //     // printk("Pitch: acc=%d°, gyro=%d°, comp=%d° | Roll: acc=%d°, gyro=%d°, comp=%d°\n",
-        //     //        imu.pitch_acc, imu.pitch_gyro, imu.pitch_complementary,
-        //     //        imu.roll_acc, imu.roll_gyro, imu.roll_complementary);
-        // } else {
-        //     printk("Read error!\n");
-        // }
 
         unsigned int key = irq_lock();
         icm_read_acc_mag_temp(i2c_dev, &imu);
