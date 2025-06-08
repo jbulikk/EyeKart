@@ -21,7 +21,7 @@ float last_measurement_time;
 float alpha = 0.998;
 
 double get_time_seconds() {
-    printk("%f", (k_uptime_get() / 1000.0f));
+    // printk("%f", (k_uptime_get() / 1000.0f));
     return k_uptime_get() / 1000.0f;
 }
 

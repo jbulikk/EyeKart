@@ -25,7 +25,7 @@ static void on_connected(void) {
 static void send_angle_callback(struct k_timer *timer_id)
 {
     char message[16];
-    snprintf(message, sizeof(message), "%.2f", imu.pitch_complementary); 
+    snprintf(message, sizeof(message), "%.2f; %.2f", imu.pitch_complementary, imu.roll_complementary); 
     
     printk("Sending %s\n", message);
     bt_central_send(message);  // Send the whole string, not a single char
