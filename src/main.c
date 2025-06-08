@@ -1,6 +1,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/device.h>
+#include <stdio.h>
 #include "ICM20948.h"
 #include "bt_central.h"
 #include "led_control.h"
@@ -52,7 +53,7 @@ int main(void) {
     printk("Initializing ICM-20948...\n");
     icm_init(i2c_dev);
 
-    printf("Start loop...\n");
+    printk("Start loop...\n");
 
     while (1) {
         // if (icm_read_data_and_calculate_angle(i2c_dev, &imu) == 0) {
