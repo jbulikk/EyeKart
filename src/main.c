@@ -51,8 +51,6 @@ int main(void) {
     k_timer_start(&led_timer, K_SECONDS(1), K_SECONDS(1));
 
     printk("Start of main\n");
-    bt_central_init(on_connected);
-    k_timer_start(&send_angle_timer, K_MSEC(50), K_MSEC(50));
 
     const struct device *i2c_dev = device_get_binding(I2C_DEV_LABEL);
     if (!i2c_dev) {
@@ -64,6 +62,13 @@ int main(void) {
 
     printk("Initializing ICM-20948...\n");
     icm_init(i2c_dev);
+
+    printk("Calibrating gyro...\n");
+    icm_calibrate_gyro(i2c_dev, 500);
+    printk("Gyro calibrated\n");
+
+    bt_central_init(on_connected);
+    k_timer_start(&send_angle_timer, K_MSEC(50), K_MSEC(50));
 
     printk("Start loop...\n");
 

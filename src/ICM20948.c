@@ -18,7 +18,7 @@ const static float gyro_sensitivity = 16.4;
 float sampling_time_sec;
 float measurement_time;
 float last_measurement_time = 0.0f;
-float alpha = 0.95f;
+float alpha = 0.8f;
 
 double get_time_seconds() {
     // printk("%f", (k_uptime_get() / 1000.0f));
@@ -89,6 +89,31 @@ int icm_read_all_data(const struct device *i2c_dev,
     return 0;
 }
 
+// Gyro calibration offsets
+static float gyro_offset_x = 0.0f;
+static float gyro_offset_y = 0.0f;
+static float gyro_offset_z = 0.0f;
+
+void icm_calibrate_gyro(const struct device *i2c_dev, int samples) {
+    int32_t sum_x = 0, sum_y = 0, sum_z = 0;
+    int16_t gx, gy, gz;
+    printk("Calibrating gyro... keep device still\n");
+    for (int i = 0; i < samples; ++i) {
+        icm_select_bank(i2c_dev, 0);
+        icm_read_word(i2c_dev, GYRO_XOUT_H + 0, &gx);
+        icm_read_word(i2c_dev, GYRO_XOUT_H + 2, &gy);
+        icm_read_word(i2c_dev, GYRO_XOUT_H + 4, &gz);
+        sum_x += gx;
+        sum_y += gy;
+        sum_z += gz;
+        k_msleep(2);
+    }
+    gyro_offset_x = (float)sum_x / samples;
+    gyro_offset_y = (float)sum_y / samples;
+    gyro_offset_z = (float)sum_z / samples;
+    printk("Gyro offsets: x=%.2f, y=%.2f, z=%.2f\n", gyro_offset_x, gyro_offset_y, gyro_offset_z);
+}
+
 int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu) {
     measurement_time = get_time_seconds();
     sampling_time_sec = measurement_time - last_measurement_time;
@@ -109,6 +134,11 @@ int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu) {
     {
         return -EIO;
     }
+
+    // Subtract gyro offsets
+    gyro_x -= (int16_t)gyro_offset_x;
+    gyro_y -= (int16_t)gyro_offset_y;
+    gyro_z -= (int16_t)gyro_offset_z;
 
     // printk("acc_x=%d, acc_y=%d, acc_z=%d, gyro_x=%d, gyro_y=%d, gyro_z=%d\n",
     //     acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z);
