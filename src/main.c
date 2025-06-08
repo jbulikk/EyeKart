@@ -34,9 +34,12 @@ static void send_angle_callback(struct k_timer *timer_id) {
     char message[24];
     float pitch, roll, yaw;
     unsigned int key = irq_lock();
-    pitch = imu.pitch_complementary;
-    roll = imu.roll_complementary;
-    yaw = imu.yaw_complementary;
+    // pitch = imu.pitch_complementary;
+    // roll = imu.roll_complementary;
+    // yaw = imu.yaw_complementary;
+    pitch = imu.fused_pitch;
+    roll = imu.fused_roll;
+    yaw = imu.fused_yaw;
     irq_unlock(key);
     // filter_angles_inplace(&pitch, &roll);
     snprintf(message, sizeof(message), "%d; %d; %d", (int)(pitch * 100), (int)(roll * 100), (int)(yaw * 100));
@@ -72,11 +75,17 @@ int main(void) {
 
     printk("Start loop...\n");
 
+    ak_read_whoami(i2c_dev);
+    ak_read_whoami(i2c_dev);
+    ak_read_whoami(i2c_dev);
     while (1) {
-
         unsigned int key = irq_lock();
+        double start = get_time_seconds();
         icm_read_acc_mag_temp(i2c_dev, &imu);
+        double stop = get_time_seconds();
         irq_unlock(key);
-        k_sleep(K_SECONDS(0.01));
+        uint32_t elapsed = (uint32_t)((stop - start) * 1000000); // Convert seconds to microseconds
+        // printk("took time: %u us\n", elapsed);
+        k_sleep(K_MSEC(10));
     }
 }

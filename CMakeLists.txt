@@ -12,4 +12,5 @@ target_sources(app PRIVATE
   src/angle_servo.c
   src/servo.c
   src/gimbal.c
-  src/ICM20948.c)
+  src/ICM20948.c
+  src/madgwick.c)
