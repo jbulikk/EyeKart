@@ -2,18 +2,12 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/device.h>
 #include "ICM20948.h"
+#include "bt_central.h"
+#include "led_control.h"
 
 #define I2C_DEV_LABEL "I2C_0"
 
-ImuData imu;
-
-
-// BT PERIPHERAL
-static void on_receive(const char *data) {
-    // float data_f = (float)*data;
-    // printk("Peripheral received: %f\n", data_f);
-    printk("Peripheral received: %s\n", data);
-}
+static ImuData imu;
 
 static void led_timer_callback(struct k_timer *timer_id)
 {
@@ -27,11 +21,10 @@ static void on_connected(void) {
     printk("Connected to peripheral.\n");
 }
 
-
 static void send_angle_callback(struct k_timer *timer_id)
 {
     char message[16];
-    snprintf(message, sizeof(message), "%.2f, %.2f", imu.pitch_complementary, imu.roll_complementary); 
+    snprintf(message, sizeof(message), "%.2f", imu.pitch_complementary); 
     
     printk("Sending %s\n", message);
     bt_central_send(message);  // Send the whole string, not a single char
@@ -62,8 +55,16 @@ int main(void) {
     printf("Start loop...\n");
 
     while (1) {
+        // if (icm_read_data_and_calculate_angle(i2c_dev, &imu) == 0) {
+        //     // printk("Pitch: acc=%d°, gyro=%d°, comp=%d° | Roll: acc=%d°, gyro=%d°, comp=%d°\n",
+        //     //        imu.pitch_acc, imu.pitch_gyro, imu.pitch_complementary,
+        //     //        imu.roll_acc, imu.roll_gyro, imu.roll_complementary);
+        // } else {
+        //     printk("Read error!\n");
+        // }
+
         icm_read_acc_mag_temp(i2c_dev, &imu);
 
-        k_sleep(K_MSEC(1));
+        k_sleep(K_SECONDS(0.01));
     }
 }
