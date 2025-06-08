@@ -8,7 +8,6 @@
 #include "gimbal.h"
 #include "led_control.h"
 
-// BT PERIPHERAL
 static void on_receive(const char *data) {
     int pitch_i = 0, roll_i = 0, yaw_i = 0;
     printk("Peripheral received: %s\n", data);
@@ -26,7 +25,6 @@ static void on_receive(const char *data) {
 
 static void led_timer_callback(struct k_timer *timer_id) {
     led_toggle();
-    // bt_central_send("Hello from timer");
 }
 K_TIMER_DEFINE(led_timer, led_timer_callback, NULL);
 

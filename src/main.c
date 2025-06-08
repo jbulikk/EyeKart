@@ -7,26 +7,19 @@
 
 ImuData imu;
 
-
-// BT PERIPHERAL
 static void on_receive(const char *data) {
-    // float data_f = (float)*data;
-    // printk("Peripheral received: %f\n", data_f);
     printk("Peripheral received: %s\n", data);
 }
 
 static void led_timer_callback(struct k_timer *timer_id)
 {
 	led_toggle();
-	// bt_central_send("Hello from timer");
 }
 K_TIMER_DEFINE(led_timer, led_timer_callback, NULL);
 
-// BT CENTRAL
 static void on_connected(void) {
     printk("Connected to peripheral.\n");
 }
-
 
 static void send_angle_callback(struct k_timer *timer_id)
 {
@@ -34,7 +27,7 @@ static void send_angle_callback(struct k_timer *timer_id)
     snprintf(message, sizeof(message), "%.2f, %.2f", imu.pitch_complementary, imu.roll_complementary); 
     
     printk("Sending %s\n", message);
-    bt_central_send(message);  // Send the whole string, not a single char
+    bt_central_send(message);
 }
 K_TIMER_DEFINE(send_angle_timer, send_angle_callback, NULL);
 
@@ -52,10 +45,7 @@ int main(void) {
         printk("I2C device not found: %s\n", I2C_DEV_LABEL);
         return 0;
     }
-
     icm_read_whoami(i2c_dev);
-    
-
     printk("Initializing ICM-20948...\n");
     icm_init(i2c_dev);
 

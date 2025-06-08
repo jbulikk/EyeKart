@@ -110,12 +110,9 @@ int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu) {
         return -EIO;
     }
 
-    // printk("acc_x=%d, acc_y=%d, acc_z=%d, gyro_x=%d, gyro_y=%d, gyro_z=%d\n",
-    //     acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z);
-
     imu->accelerometer_raw.x = acc_x;
     imu->accelerometer_raw.y = acc_y;
-    imu->accelerometer_raw.z = acc_z; //multiply by 1.16
+    imu->accelerometer_raw.z = acc_z;
 
     imu->gyroscope_raw.x = gyro_x;
     imu->gyroscope_raw.y = gyro_y;
@@ -137,33 +134,9 @@ int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu) {
     imu->roll_gyro = imu->gyroscope_scaled.y;
     imu->roll_complementary = alpha * (imu->roll_complementary + imu->roll_gyro * sampling_time_sec) + (1.0 - alpha) * imu->roll_acc;
 
-    // printf("acc_x=%f, acc_y=%f, acc_z=%f, gyro_x=%f, gyro_y=%f, gyro_z=%f\n",
-    //     imu->accelerometer_scaled.x, imu->accelerometer_scaled.y, imu->accelerometer_scaled.z,
-    //     imu->gyroscope_scaled.x, imu->gyroscope_scaled.y, imu->gyroscope_scaled.z);
-
-    // printf("pitch=%f, roll=%f\n", imu->pitch_complementary, imu->roll_complementary);
-
     imu->temp = raw_temp;
     return 0;
 }
-
-// int icm_read_data_and_calculate_angle(const struct device *i2c_dev, ImuData *imu) {
-//     if (icm_read_acc_mag_temp(i2c_dev, imu) != 0) {
-//         return -EIO;
-//     }
-
-//     imu->pitch_acc = atan2(imu->accelerometer_scaled.y, imu->accelerometer_scaled.z) * 180.0 / M_PI;
-//     imu->pitch_gyro = imu->gyroscope_scaled.x;
-//     imu->pitch_complementary = alpha * (imu->pitch_complementary + imu->pitch_gyro * sampling_time_sec) +
-//                                (1.0 - alpha) * imu->pitch_acc;
-
-//     imu->roll_acc = atan2(imu->accelerometer_scaled.x, imu->accelerometer_scaled.z) * 180.0 / M_PI;
-//     imu->roll_gyro = imu->gyroscope_scaled.y;
-//     imu->roll_complementary = alpha * (imu->roll_complementary + imu->roll_gyro * sampling_time_sec) +
-//                               (1.0 - alpha) * imu->roll_acc;
-
-//     return 0;
-// }
 
 void icm_read_whoami(const struct device *i2c_dev) {
     uint8_t reg_addr = WHO_AM_I_REG;

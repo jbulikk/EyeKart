@@ -5,7 +5,6 @@
 #include <zephyr/drivers/pwm.h>
 #include <stdint.h>
 
-// Servo struct
 typedef struct servo_dt_spec
 {
     struct pwm_dt_spec pwm;
@@ -25,7 +24,6 @@ static inline bool servo_is_ready_dt(const struct servo_dt_spec *spec)
     return pwm_is_ready_dt(&spec->pwm);
 }
 
-// Set the servo pulse width
 int servo_set_pulse(const struct servo_dt_spec *servo, uint32_t pulse_width);
 
 #endif // SERVO_H
