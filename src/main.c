@@ -22,10 +22,27 @@ static void on_connected(void) {
     printk("Connected to peripheral.\n");
 }
 
+// Filtering function for pitch and roll
+static void filter_angles_inplace(float *pitch, float *roll) {
+    const float alpha = 0.2f; // Smoothing factor (0 < alpha <= 1)
+    static float prev_pitch = 0.0f;
+    static float prev_roll = 0.0f;
+    prev_pitch = alpha * (*pitch) + (1.0f - alpha) * prev_pitch;
+    prev_roll = alpha * (*roll) + (1.0f - alpha) * prev_roll;
+    *pitch = prev_pitch;
+    *roll = prev_roll;
+}
+
 static void send_angle_callback(struct k_timer *timer_id)
 {
     char message[16];
-    snprintf(message, sizeof(message), "%.2f; %.2f", imu.pitch_complementary, imu.roll_complementary); 
+    float pitch, roll;
+    unsigned int key = irq_lock();
+    pitch = imu.pitch_complementary;
+    roll = imu.roll_complementary;
+    irq_unlock(key);
+    // filter_angles_inplace(&pitch, &roll);
+    snprintf(message, sizeof(message), "%.2f; %.2f", pitch, roll); 
     
     printk("Sending %s\n", message);
     bt_central_send(message);  // Send the whole string, not a single char
@@ -64,8 +81,9 @@ int main(void) {
         //     printk("Read error!\n");
         // }
 
+        unsigned int key = irq_lock();
         icm_read_acc_mag_temp(i2c_dev, &imu);
-
+        irq_unlock(key);
         k_sleep(K_SECONDS(0.01));
     }
 }
