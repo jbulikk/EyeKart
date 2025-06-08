@@ -10,22 +10,14 @@
 
 // BT PERIPHERAL
 static void on_receive(const char *data) {
-    float pitch = 0.0f, yaw = 0.0f;
+    int pitch_i = 0, yaw_i = 0;
     printk("Peripheral received: %s\n", data);
-    const char *sep = strchr(data, ';');
-    if (sep) {
-        char pitch_str[16] = {0};
-        char yaw_str[16] = {0};
-        size_t len = sep - data;
-        if (len > 0 && len < sizeof(pitch_str)) {
-            memcpy(pitch_str, data, len);
-            strncpy(yaw_str, sep + 1, sizeof(yaw_str) - 1);
-            pitch = strtof(pitch_str, NULL);
-            yaw = strtof(yaw_str, NULL);
-            gimbal_set_pitch(pitch);
-            gimbal_set_yaw(yaw);
-            return;
-        }
+    if (sscanf(data, "%d;%d", &pitch_i, &yaw_i) == 2) {
+        float pitch = pitch_i / 100.0f;
+        float yaw = yaw_i / 100.0f;
+        gimbal_set_pitch(pitch);
+        gimbal_set_yaw(yaw);
+        return;
     }
     printk("Peripheral received (unparsed): %s\n", data);
 }
