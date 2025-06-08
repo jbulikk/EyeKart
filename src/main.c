@@ -31,14 +31,15 @@ static void filter_angles_inplace(float *pitch, float *roll) {
 }
 
 static void send_angle_callback(struct k_timer *timer_id) {
-    char message[16];
-    float pitch, roll;
+    char message[24];
+    float pitch, roll, yaw;
     unsigned int key = irq_lock();
     pitch = imu.pitch_complementary;
     roll = imu.roll_complementary;
+    yaw = imu.yaw_complementary;
     irq_unlock(key);
     // filter_angles_inplace(&pitch, &roll);
-    snprintf(message, sizeof(message), "%d; %d", (int)(pitch * 100), (int)(roll * 100));
+    snprintf(message, sizeof(message), "%d; %d; %d", (int)(pitch * 100), (int)(roll * 100), (int)(yaw * 100));
 
     printk("Sending %s\n", message);
     bt_central_send(message); // Send the whole string, not a single char

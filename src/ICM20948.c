@@ -17,8 +17,8 @@ const static float acc_sensitivity = 4096;
 const static float gyro_sensitivity = 16.4;
 float sampling_time_sec;
 float measurement_time;
-float last_measurement_time;
-float alpha = 0.992;
+float last_measurement_time = 0.0f;
+float alpha = 0.99f;
 
 double get_time_seconds() {
     // printk("%f", (k_uptime_get() / 1000.0f));
@@ -131,11 +131,16 @@ int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu) {
 
     imu->pitch_acc = atan2(imu->accelerometer_scaled.y, imu->accelerometer_scaled.z) * 180.0/M_PI;
     imu->pitch_gyro = imu->gyroscope_scaled.x;
-    imu->pitch_complementary = alpha * (imu->pitch_complementary + imu->pitch_gyro * sampling_time_sec) + (1.0 - alpha) * imu->pitch_acc;
+    imu->pitch_complementary = alpha * (imu->pitch_complementary + imu->pitch_gyro * sampling_time_sec) + (1.0f - alpha) * imu->pitch_acc;
    
     imu->roll_acc = atan2(imu->accelerometer_scaled.x, imu->accelerometer_scaled.z) * 180.0/M_PI;
     imu->roll_gyro = imu->gyroscope_scaled.y;
-    imu->roll_complementary = alpha * (imu->roll_complementary + imu->roll_gyro * sampling_time_sec) + (1.0 - alpha) * imu->roll_acc;
+    imu->roll_complementary = alpha * (imu->roll_complementary + imu->roll_gyro * sampling_time_sec) + (1.0f - alpha) * imu->roll_acc;
+
+    // Yaw calculation (accel + gyro, no magnetometer)
+    imu->yaw_acc = atan2(imu->accelerometer_scaled.x, imu->accelerometer_scaled.y) * 180.0/M_PI;
+    imu->yaw_gyro = imu->gyroscope_scaled.z;
+    imu->yaw_complementary = alpha * (imu->yaw_complementary + imu->yaw_gyro * sampling_time_sec) + (1.0f - alpha) * imu->yaw_acc;
 
     // printf("acc_x=%f, acc_y=%f, acc_z=%f, gyro_x=%f, gyro_y=%f, gyro_z=%f\n",
     //     imu->accelerometer_scaled.x, imu->accelerometer_scaled.y, imu->accelerometer_scaled.z,

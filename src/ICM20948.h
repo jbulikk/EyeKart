@@ -36,6 +36,7 @@ typedef struct {
     float yaw_gyro;
     float pitch_complementary;
     float roll_complementary;
+    float yaw_complementary;
     int16_t temp;
 } ImuData;
 
