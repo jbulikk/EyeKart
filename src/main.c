@@ -14,6 +14,9 @@
 #include <zephyr/sys/printk.h>
 
 #include "gimbal.h"
+#include "led_control.h"
+#include "bt_central.h"
+#include "bt_peripheral.h"
 
 enum direction {
     DOWN,
@@ -44,7 +47,7 @@ void gimbal_task_thread(void *arg1, void *arg2, void *arg3) {
     bool up = true;
     while (1) {
         if (up) {
-            gimbal_set_pitch(-45);
+            gimbal_set_pitch(45);
             gimbal_set_yaw(60);
             printk("[GIMBAL TASK] state 0\n");
         } else {

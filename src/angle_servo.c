@@ -2,7 +2,7 @@
 
 int angle_servo_init(angle_servo_t *as, const servo_dt_spec *servo, float min_angle, float max_angle)
 {
-    if (!servo_is_ready_dt(&servo))
+    if (!servo_is_ready_dt(servo))
         return 0;
 
     as->servo = *servo;
@@ -14,6 +14,7 @@ int angle_servo_init(angle_servo_t *as, const servo_dt_spec *servo, float min_an
         as->ratio = 0.0f;
     else
         as->ratio = (range_pulse / range_angle);
+    return 1;
 }
 
 int angle_servo_set_angle(const angle_servo_t *as, float angle_deg)
