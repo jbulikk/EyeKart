@@ -10,13 +10,15 @@
 
 // BT PERIPHERAL
 static void on_receive(const char *data) {
-    int pitch_i = 0, yaw_i = 0;
+    int pitch_i = 0, roll_i = 0, yaw_i = 0;
     printk("Peripheral received: %s\n", data);
-    if (sscanf(data, "%d;%d", &pitch_i, &yaw_i) == 2) {
+    if (sscanf(data, "%d;%d;%d", &pitch_i, &roll_i, &yaw_i) == 3) {
         float pitch = pitch_i / 100.0f;
+        float roll = roll_i / 100.0f;
         float yaw = yaw_i / 100.0f;
         gimbal_set_pitch(pitch);
-        gimbal_set_yaw(yaw);
+        // roll is received but not used for gimbal
+        gimbal_set_yaw(roll);
         return;
     }
     printk("Peripheral received (unparsed): %s\n", data);
