@@ -46,7 +46,6 @@ int icm_read_all_data(const struct device *i2c_dev,
                       int16_t *gx, int16_t *gy, int16_t *gz,
                       int16_t *temp);
 void icm_read_whoami(const struct device *i2c_dev);
-int icm_read_acc_mag_temp(const struct device *i2c_dev, ImuData *imu);
 int icm_read_data_and_calculate_angle(const struct device *i2c_dev, ImuData *imu);
 void icm_calibrate_gyro(const struct device *i2c_dev, int samples);
 

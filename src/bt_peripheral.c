@@ -41,7 +41,6 @@ static ssize_t write_func(struct bt_conn *conn,
     return len;
 }
 
-// GATT service definition using standard Zephyr macros (no internal symbols)
 BT_GATT_SERVICE_DEFINE(my_service,
     BT_GATT_PRIMARY_SERVICE(BT_UUID_DECLARE_128(BT_UUID_128_ENCODE(
         0x12345678, 0x1234, 0x5678, 0x1234, 0x56789abcdef0))),

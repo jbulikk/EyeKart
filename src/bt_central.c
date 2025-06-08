@@ -16,7 +16,6 @@ static struct bt_uuid_128 remote_char_uuid = BT_UUID_INIT_128(
 
 static uint16_t char_handle;
 
-// Helper to check advertised name
 static bool check_name(struct bt_data *data, void *user_data)
 {
     const char *name = user_data;
@@ -90,7 +89,7 @@ static bool device_found(struct bt_data *data, void *user_data)
         if (strlen(check->name) == data->data_len &&
             !memcmp(data->data, check->name, data->data_len)) {
             check->found = true;
-            return false; // stop parsing further (optional)
+            return false; // stop parsing 
         }
     }
     return true; // continue parsing
@@ -128,7 +127,6 @@ static void scan_cb(const bt_addr_le_t *addr, int8_t rssi, uint8_t type,
         if (err) {
             printk("Connection failed: %d\n", err);
         }
-        // printk("Connected: %d\n", err);
     } else {
         printk("Skipping device: %s (name not matched)\n", addr_str);
     }

@@ -40,5 +40,5 @@ int button_init(void) {
 bool button_is_pressed(void) {
     if (!device_is_ready(button.port))
         return false;
-    return gpio_pin_get_dt(&button) == 0; // Active low with pull-up
+    return gpio_pin_get_dt(&button) == 0; // active low with pull-up
 }

@@ -17,16 +17,13 @@ static float yaw_offset = 0.0f;
 
 static void led_timer_callback(struct k_timer *timer_id) {
     led_toggle();
-    // bt_central_send("Hello from timer");
 }
 K_TIMER_DEFINE(led_timer, led_timer_callback, NULL);
 
-// BT CENTRAL
 static void on_connected(void) { printk("Connected to peripheral.\n"); }
 
-// Filtering function for pitch and roll
 static void filter_angles_inplace(float *pitch, float *roll) {
-    const float alpha = 0.2f; // Smoothing factor (0 < alpha <= 1)
+    const float alpha = 0.2f;
     static float prev_pitch = 0.0f;
     static float prev_roll = 0.0f;
     prev_pitch = alpha * (*pitch) + (1.0f - alpha) * prev_pitch;
@@ -43,16 +40,14 @@ static void send_angle_callback(struct k_timer *timer_id) {
     roll = imu.roll_complementary - roll_offset;
     yaw = imu.yaw_complementary - yaw_offset;
     irq_unlock(key);
-    // filter_angles_inplace(&pitch, &roll);
     snprintf(message, sizeof(message), "%d; %d; %d", (int)(pitch * 100), (int)(roll * 100), (int)(yaw * 100));
 
     printk("Sending %s\n", message);
-    bt_central_send(message); // Send the whole string, not a single char
+    bt_central_send(message);
 }
 K_TIMER_DEFINE(send_angle_timer, send_angle_callback, NULL);
 
 static void button_angle_offset_callback(void) {
-    // Set offsets to current angles
     roll_offset = imu.roll_complementary;
     pitch_offset = imu.pitch_complementary;
     yaw_offset = imu.yaw_complementary;
@@ -90,8 +85,7 @@ int main(void) {
 
     while (1) {
         unsigned int key = irq_lock();
-        icm_read_acc_mag_temp(i2c_dev, &imu);
-        // Apply offsets
+        icm_read_data_and_calculate_angle(i2c_dev, &imu);
         irq_unlock(key);
         k_sleep(K_SECONDS(0.01));
     }
