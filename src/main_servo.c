@@ -16,7 +16,7 @@ static void on_receive(const char *data) {
         float pitch = pitch_i / 100.0f;
         float roll = roll_i / 100.0f;
         float yaw = yaw_i / 100.0f;
-        gimbal_set_pitch(pitch);
+        gimbal_set_pitch(-pitch);
         // roll is received but not used for gimbal
         gimbal_set_yaw(roll);
         return;

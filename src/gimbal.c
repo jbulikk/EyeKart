@@ -16,9 +16,9 @@ typedef const struct limits_t {
     float max_angle; // degrees
 } limits_t;
 
-static const limits_t yaw_limits = {.min_angle = -45.0f, .max_angle = 45.0f};
+static const limits_t yaw_limits = {.min_angle = -90.0f, .max_angle = 90.0f};
 
-static const limits_t pitch_limits = {.min_angle = -15.0f, .max_angle = 15.0f};
+static const limits_t pitch_limits = {.min_angle = -60.0f, .max_angle = 60.0f};
 
 int gimbal_init(void) {
     if (angle_servo_init(&gimbal_yaw, &servo_yaw, -95.0f, 95.0f) != 0) {
