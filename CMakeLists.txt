@@ -5,7 +5,8 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(servo_motor)
 
 target_sources(app PRIVATE
-  src/main.c
+  # src/main.c
+  src/main_servo.c
   src/led_control.c
   src/bt_central.c
   src/bt_peripheral.c
